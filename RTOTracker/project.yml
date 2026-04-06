@@ -1,0 +1,14 @@
+name: RTOTracker
+options:
+  bundleIdPrefix: com.rtotracker
+targets:
+  RTOTracker:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - RTOTracker
+    settings:
+      PRODUCT_NAME: RTO Tracker
+      INFOPLIST_FILE: RTOTracker/Info.plist
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
