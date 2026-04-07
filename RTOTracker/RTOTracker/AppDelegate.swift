@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var officeDetectionService: OfficeDetectionService?
     var dataManager: DataManager?
     var settingsWindow: NSWindow?
+    var calendarWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide dock icon for menu bar only app
@@ -61,6 +62,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 officeDetectionService: officeDetectionService!,
                 onOpenSettings: { [weak self] in
                     self?.openSettings()
+                },
+                onOpenCalendar: { [weak self] in
+                    self?.openCalendar()
                 }
             )
         )
@@ -123,12 +127,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
+
+    @MainActor
+    func openCalendar() {
+        print("AppDelegate.openCalendar() called")
+
+        // If calendar window already exists, bring it to front
+        if let window = calendarWindow, window.isVisible {
+            print("Calendar window already exists, bringing to front")
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        print("Creating new calendar window")
+
+        // Create new calendar window
+        let calendarView = CalendarView(dataManager: dataManager!)
+        let hostingController = NSHostingController(rootView: calendarView)
+
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "RTO Calendar"
+        window.styleMask = [.titled, .closable, .resizable]
+        window.setContentSize(NSSize(width: 700, height: 600))
+        window.minSize = NSSize(width: 650, height: 550)
+        window.delegate = self
+        window.center()
+
+        self.calendarWindow = window
+
+        print("Showing calendar window")
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
 }
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         if notification.object as? NSWindow === settingsWindow {
             settingsWindow = nil
+        } else if notification.object as? NSWindow === calendarWindow {
+            calendarWindow = nil
         }
     }
 }

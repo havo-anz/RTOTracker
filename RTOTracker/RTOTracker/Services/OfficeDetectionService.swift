@@ -1,6 +1,7 @@
 import Foundation
 import Network
 import Combine
+import AppKit
 
 final class OfficeDetectionService: ObservableObject {
     @Published var isAtOffice: Bool = false
@@ -14,6 +15,14 @@ final class OfficeDetectionService: ObservableObject {
 
     init(dataManager: DataManager) {
         self.dataManager = dataManager
+
+        // Listen for wake from sleep
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(systemDidWake),
+            name: NSWorkspace.didWakeNotification,
+            object: nil
+        )
     }
 
     func startDetection() {
@@ -29,9 +38,19 @@ final class OfficeDetectionService: ObservableObject {
         }
     }
 
+    @objc private func systemDidWake() {
+        print("🌅 Mac woke from sleep - checking office presence immediately")
+        checkOfficePresence()
+    }
+
     func stopDetection() {
         timer?.invalidate()
         timer = nil
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+    }
+
+    deinit {
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
     }
 
     func checkOfficePresence() {

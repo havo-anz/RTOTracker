@@ -4,6 +4,7 @@ struct MenuView: View {
     @ObservedObject var dataManager: DataManager
     @ObservedObject var officeDetectionService: OfficeDetectionService
     var onOpenSettings: () -> Void
+    var onOpenCalendar: () -> Void
 
     @State private var showingDetailView = false
     @State private var showingSettings = false
@@ -89,6 +90,9 @@ struct MenuView: View {
             }
             .frame(height: 8)
 
+            // Tracking Status
+            trackingStatusView
+
             // Stats
             VStack(alignment: .leading, spacing: 4) {
                 Text(daysRemainingText)
@@ -129,12 +133,37 @@ struct MenuView: View {
     }
 
     private func openCalendarWindow() {
-        // TODO: Implement calendar view
-        let alert = NSAlert()
-        alert.messageText = "Calendar View"
-        alert.informativeText = "Calendar view coming soon!"
-        alert.alertStyle = .informational
-        alert.runModal()
+        print("Opening calendar")
+        onOpenCalendar()
+    }
+
+    // MARK: - Views
+
+    private var trackingStatusView: some View {
+        let tracking = dataManager.getTrackingStatus()
+
+        return HStack(spacing: 8) {
+            Image(systemName: tracking.status.icon)
+                .foregroundColor(statusColor(tracking.status))
+                .font(.system(size: 14))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tracking.status.displayText)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(statusColor(tracking.status))
+
+                Text("Expected: \(tracking.expectedDays) • Actual: \(tracking.actualDays)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(statusColor(tracking.status).opacity(0.1))
+        .cornerRadius(8)
     }
 
     // MARK: - Computed Properties
@@ -162,6 +191,17 @@ struct MenuView: View {
         } else if percentage >= 0.5 {
             return .orange
         } else {
+            return .red
+        }
+    }
+
+    private func statusColor(_ status: DataManager.TrackingStatus) -> Color {
+        switch status {
+        case .ahead:
+            return .green
+        case .onTrack:
+            return .blue
+        case .behind:
             return .red
         }
     }

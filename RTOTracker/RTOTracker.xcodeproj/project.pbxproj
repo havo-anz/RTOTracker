@@ -15,6 +15,7 @@
 		0006 /* OfficeDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015 /* OfficeDetectionService.swift */; };
 		0007 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016 /* MenuView.swift */; };
 		0008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0017 /* SettingsView.swift */; };
+		0009 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0019 /* CalendarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		0016 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		0017 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0019 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		0100 /* RTOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -93,6 +95,7 @@
 			children = (
 				0016 /* MenuView.swift */,
 				0017 /* SettingsView.swift */,
+				0019 /* CalendarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -173,6 +176,7 @@
 				0006 /* OfficeDetectionService.swift in Sources */,
 				0007 /* MenuView.swift in Sources */,
 				0008 /* SettingsView.swift in Sources */,
+				0009 /* CalendarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

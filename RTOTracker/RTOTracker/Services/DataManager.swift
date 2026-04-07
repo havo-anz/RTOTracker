@@ -84,6 +84,84 @@ final class DataManager: ObservableObject {
         return (confirmedDays, settings.quarterTarget)
     }
 
+    func getTrackingStatus() -> (status: TrackingStatus, expectedDays: Int, actualDays: Int) {
+        let (startDate, endDate) = getQuarterDates(for: Date())
+        let today = Calendar.current.startOfDay(for: Date())
+
+        // Count workdays elapsed from quarter start to today
+        var workdaysElapsed = 0
+        var currentDate = startDate
+
+        while currentDate <= today && currentDate <= endDate {
+            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            // weekday: 1 = Sunday, 7 = Saturday
+            if weekday != 1 && weekday != 7 {
+                workdaysElapsed += 1
+            }
+            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+        }
+
+        // Count total workdays in quarter
+        var totalWorkdays = 0
+        currentDate = startDate
+
+        while currentDate <= endDate {
+            let weekday = Calendar.current.component(.weekday, from: currentDate)
+            if weekday != 1 && weekday != 7 {
+                totalWorkdays += 1
+            }
+            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+        }
+
+        // Calculate expected days by now
+        let expectedDays = totalWorkdays > 0 ? Int(round(Double(workdaysElapsed) * Double(settings.quarterTarget) / Double(totalWorkdays))) : 0
+
+        // Get actual confirmed days
+        let actualDays = getRecordsForQuarter().filter { $0.isConfirmed }.count
+
+        // Determine status
+        let status: TrackingStatus
+        if actualDays >= expectedDays + 2 {
+            status = .ahead
+        } else if actualDays >= expectedDays - 1 {
+            status = .onTrack
+        } else {
+            status = .behind
+        }
+
+        return (status, expectedDays, actualDays)
+    }
+
+    enum TrackingStatus {
+        case ahead
+        case onTrack
+        case behind
+
+        var displayText: String {
+            switch self {
+            case .ahead: return "Ahead of Schedule"
+            case .onTrack: return "On Track"
+            case .behind: return "Behind Schedule"
+            }
+        }
+
+        var color: String {
+            switch self {
+            case .ahead: return "green"
+            case .onTrack: return "blue"
+            case .behind: return "red"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .ahead: return "arrow.up.circle.fill"
+            case .onTrack: return "checkmark.circle.fill"
+            case .behind: return "exclamationmark.triangle.fill"
+            }
+        }
+    }
+
     // MARK: - Quarter Calculations
 
     func getQuarterDates(for date: Date) -> (start: Date, end: Date) {
