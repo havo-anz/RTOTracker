@@ -5,6 +5,7 @@ struct MenuView: View {
     @ObservedObject var officeDetectionService: OfficeDetectionService
     var onOpenSettings: () -> Void
     var onOpenCalendar: () -> Void
+    var onCheckForUpdates: () -> Void
 
     @State private var showingDetailView = false
     @State private var showingSettings = false
@@ -115,6 +116,11 @@ struct MenuView: View {
 
             Button("Settings") {
                 openSettingsWindow()
+            }
+            .buttonStyle(.bordered)
+
+            Button("Check for Updates...") {
+                onCheckForUpdates()
             }
             .buttonStyle(.bordered)
 

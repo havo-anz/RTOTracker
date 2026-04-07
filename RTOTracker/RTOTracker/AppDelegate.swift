@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var dataManager: DataManager?
     var settingsWindow: NSWindow?
     var calendarWindow: NSWindow?
+    var updateChecker: UpdateChecker?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide dock icon for menu bar only app
@@ -16,12 +17,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize services
         dataManager = DataManager()
         officeDetectionService = OfficeDetectionService(dataManager: dataManager!)
+        updateChecker = UpdateChecker()
 
         // Setup menu bar
         setupMenuBar()
 
         // Start detection
         officeDetectionService?.startDetection()
+
+        // Check for updates in background (silent)
+        updateChecker?.checkForUpdatesInBackground()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -65,6 +70,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 },
                 onOpenCalendar: { [weak self] in
                     self?.openCalendar()
+                },
+                onCheckForUpdates: { [weak self] in
+                    self?.checkForUpdates()
                 }
             )
         )
@@ -159,6 +167,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         print("Showing calendar window")
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @MainActor
+    func checkForUpdates() {
+        print("AppDelegate.checkForUpdates() called")
+        updateChecker?.checkForUpdates()
     }
 }
 

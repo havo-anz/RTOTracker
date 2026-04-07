@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>RTO Tracker Updates</title>
+        <link>https://github.com/havo-anz/RTOTracker</link>
+        <description>Automatic updates for RTO Tracker</description>
+        <language>en</language>
+
+        <!-- Version 1.0 - Initial Release -->
+        <item>
+            <title>Version 1.0</title>
+            <description><![CDATA[
+                <h2>RTO Tracker v1.0</h2>
+                <h3>Features</h3>
+                <ul>
+                    <li>✅ Automatic office detection via IP address</li>
+                    <li>✅ Real-time quarterly progress tracking</li>
+                    <li>✅ Menu bar integration</li>
+                    <li>✅ Calendar view with monthly grid</li>
+                    <li>✅ Tracking status indicator (ahead/on track/behind)</li>
+                    <li>✅ Wake-from-sleep detection</li>
+                    <li>✅ Manual day override capability</li>
+                    <li>✅ Settings customization</li>
+                </ul>
+            ]]></description>
+            <pubDate>Sun, 06 Apr 2026 14:00:00 +0000</pubDate>
+            <sparkle:version>1.0.0</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <enclosure
+                url="https://github.com/havo-anz/RTOTracker/releases/download/v1.0/RTO-Tracker-Installer-v1.0.dmg"
+                sparkle:edSignature="SIGNATURE_WILL_BE_GENERATED"
+                length="129024"
+                type="application/octet-stream"
+            />
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+        </item>
+    </channel>
+</rss>
