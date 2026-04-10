@@ -2,37 +2,32 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
         <title>RTO Tracker Updates</title>
-        <link>https://github.com/havo-anz/RTOTracker</link>
-        <description>Automatic updates for RTO Tracker</description>
+        <link>https://raw.githubusercontent.com/havo-anz/RTOTracker/main/appcast.xml</link>
+        <description>Updates for RTO Tracker - Office Attendance Tracker</description>
         <language>en</language>
 
-        <!-- Version 1.0 - Initial Release -->
         <item>
-            <title>Version 1.0</title>
-            <description><![CDATA[
-                <h2>RTO Tracker v1.0</h2>
-                <h3>Features</h3>
-                <ul>
-                    <li>✅ Automatic office detection via IP address</li>
-                    <li>✅ Real-time quarterly progress tracking</li>
-                    <li>✅ Menu bar integration</li>
-                    <li>✅ Calendar view with monthly grid</li>
-                    <li>✅ Tracking status indicator (ahead/on track/behind)</li>
-                    <li>✅ Wake-from-sleep detection</li>
-                    <li>✅ Manual day override capability</li>
-                    <li>✅ Settings customization</li>
-                </ul>
-            ]]></description>
-            <pubDate>Sun, 06 Apr 2026 14:00:00 +0000</pubDate>
-            <sparkle:version>1.0.0</sparkle:version>
-            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <title>Version 1.1</title>
+            <pubDate>Fri, 10 Apr 2026 06:36:25 +0000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <enclosure
-                url="https://github.com/havo-anz/RTOTracker/releases/download/v1.0/RTO-Tracker-Installer-v1.0.dmg"
-                sparkle:edSignature="SIGNATURE_WILL_BE_GENERATED"
-                length="129024"
-                type="application/octet-stream"
-            />
-            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+                url="https://github.com/havo-anz/RTOTracker/releases/download/v1.1/RTOTracker-1.1.zip"
+                sparkle:edSignature="iv4YKFobYoiHZNnugrxcF0IJ2YKZ3C1daXageYuNHPKfrAaUipE2qaWxwun/Pga4M4g8nE3okoqarR4Q6JXVCw=="
+                length="1168876"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>What's New in v1.1</h2>
+                <ul>
+                    <li><strong>Fixed menu panel behavior</strong> - Menu now properly closes when opening Calendar, Settings, or checking for updates</li>
+                    <li><strong>Fixed tracking status logic</strong> - Now correctly shows "Behind" when below expectations</li>
+                    <li><strong>Fixed quarter dates</strong> - Q2 now correctly ends June 30 instead of July 1</li>
+                    <li><strong>Improved calendar</strong> - Entire cell is now tappable for easier day toggling</li>
+                    <li><strong>Added 75 comprehensive unit tests</strong> for improved reliability</li>
+                </ul>
+                <p><strong>Full details:</strong> <a href="https://github.com/havo-anz/RTOTracker/releases/tag/v1.1">Release Notes</a></p>
+            ]]></description>
         </item>
     </channel>
 </rss>
