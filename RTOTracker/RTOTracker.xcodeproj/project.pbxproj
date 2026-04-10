@@ -16,8 +16,6 @@
 		0007 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016 /* MenuView.swift */; };
 		0008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0017 /* SettingsView.swift */; };
 		0009 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0019 /* CalendarView.swift */; };
-		0020 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0021 /* UpdateChecker.swift */; };
-		C85D47992F84BC1B00E81F9A /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C85D47982F84BC1B00E81F9A /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,7 +39,6 @@
 		0017 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0019 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		0021 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		0100 /* RTOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C85D479E2F86055500E81F9A /* RTOTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTOTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -55,7 +52,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C85D47992F84BC1B00E81F9A /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,7 +110,6 @@
 			children = (
 				0014 /* DataManager.swift */,
 				0015 /* OfficeDetectionService.swift */,
-				0021 /* UpdateChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -201,7 +196,6 @@
 			);
 			mainGroup = 0300;
 			packageReferences = (
-				C85D47972F84BC1B00E81F9A /* XCLocalSwiftPackageReference "../../../Downloads/Sparkle-2.x" */,
 			);
 			productRefGroup = 0302 /* Products */;
 			projectDirPath = "";
@@ -244,7 +238,6 @@
 				0007 /* MenuView.swift in Sources */,
 				0008 /* SettingsView.swift in Sources */,
 				0009 /* CalendarView.swift in Sources */,
-				0020 /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -511,20 +504,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		C85D47972F84BC1B00E81F9A /* XCLocalSwiftPackageReference "../../../Downloads/Sparkle-2.x" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../../../Downloads/Sparkle-2.x";
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		C85D47982F84BC1B00E81F9A /* Sparkle */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Sparkle;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0700 /* Project object */;
 }

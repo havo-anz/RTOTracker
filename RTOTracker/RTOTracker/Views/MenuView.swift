@@ -5,7 +5,6 @@ struct MenuView: View {
     @ObservedObject var officeDetectionService: OfficeDetectionService
     var onOpenSettings: () -> Void
     var onOpenCalendar: () -> Void
-    var onCheckForUpdates: (() -> Void)?
 
     @State private var showingDetailView = false
     @State private var showingSettings = false
@@ -151,24 +150,6 @@ struct MenuView: View {
                 .cornerRadius(6)
             }
             .buttonStyle(.plain)
-
-            if let checkForUpdates = onCheckForUpdates {
-                Button(action: checkForUpdates) {
-                    HStack {
-                        Image(systemName: "arrow.down.circle")
-                            .font(.system(size: 13))
-                        Text("Check for Updates...")
-                            .font(.system(size: 13))
-                        Spacer()
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.secondary.opacity(0.1))
-                    .cornerRadius(6)
-                }
-                .buttonStyle(.plain)
-            }
 
             Divider()
                 .padding(.vertical, 4)

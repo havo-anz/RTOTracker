@@ -24,13 +24,5 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>SUEnableAutomaticChecks</key>
-	<true/>
-	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/havo-anz/RTOTracker/main/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>XTOITTV4KTAjFsvkuTwAQIZ9GDpROdgAkuJtOaCYPN4=</string>
-	<key>SUScheduledCheckInterval</key>
-	<integer>86400</integer>
 </dict>
 </plist>

@@ -54,7 +54,7 @@ xcodebuild -project RTOTracker.xcodeproj \
 
 **AppDelegate** (AppKit):
 - Menu bar management with `NSStatusItem`
-- Owns `OfficeDetectionService`, `DataManager`, `UpdateChecker`
+- Owns `OfficeDetectionService`, `DataManager`
 - Creates and manages `NSPanel` for dropdown menu
 - Handles global event monitoring for click-outside-to-close
 
@@ -65,7 +65,6 @@ xcodebuild -project RTOTracker.xcodeproj \
 **Services**:
 - `OfficeDetectionService`: Polls every 5 minutes, reads en0 IPv4 via `getifaddrs()`, confirms days when IP matches prefix
 - `DataManager`: Persists to UserDefaults, calculates quarter boundaries, tracking status (ahead/on track/behind)
-- `UpdateChecker`: Wraps Sparkle auto-update framework (conditionally compiled based on Sparkle availability)
 
 **Views** (SwiftUI):
 - `MenuView`: Dropdown panel with progress, stats, quick actions
@@ -105,16 +104,6 @@ All data stored in `UserDefaults` with auto-save debouncing (1 second):
 
 **Manual Override**: Users can toggle any day's confirmation status via calendar view. When toggled, `isManualOverride = true` flag is set to distinguish from automatic detection.
 
-### Sparkle Auto-Update Integration
-
-The app integrates Sparkle 2.x for automatic updates:
-- `UpdateChecker` service wraps Sparkle (gracefully degrades if framework not available)
-- Configured via `Info.plist` keys: `SUFeedURL`, `SUPublicEDKey`, `SUEnableAutomaticChecks`
-- Appcast XML hosted at: `https://raw.githubusercontent.com/havo-anz/RTOTracker/main/appcast.xml`
-- Uses EdDSA signing for update verification
-
-See `SPARKLE_SETUP.md` for full setup and release process.
-
 ## Important Patterns
 
 ### Window Management
@@ -151,8 +140,7 @@ Views receive AppDelegate methods as closures:
 ```swift
 MenuView(
     dataManager: dataManager!,
-    onOpenSettings: { [weak self] in self?.openSettings() },
-    onCheckForUpdates: updateCheckClosure
+    onOpenSettings: { [weak self] in self?.openSettings() }
 )
 ```
 
@@ -170,4 +158,3 @@ This keeps SwiftUI views testable and decoupled from AppKit.
 - Menu bar icon updates on `@Published` changes via `updateMenuBarIcon()`
 - Settings window and calendar window are single-instance (bring to front if already open)
 - The app uses `@NSApplicationDelegateAdaptor` to bridge SwiftUI App lifecycle to AppKit AppDelegate
-- Package dependency: Sparkle (via SPM) at `https://github.com/sparkle-project/Sparkle` version 2.6.0+

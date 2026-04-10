@@ -8,7 +8,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var dataManager: DataManager?
     var settingsWindow: NSWindow?
     var calendarWindow: NSWindow?
-    var updateChecker: UpdateChecker?
     var eventMonitor: Any?
 
     @MainActor
@@ -19,16 +18,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize services
         dataManager = DataManager()
         officeDetectionService = OfficeDetectionService(dataManager: dataManager!)
-        updateChecker = UpdateChecker()
 
         // Setup menu bar
         setupMenuBar()
 
         // Start detection
         officeDetectionService?.startDetection()
-
-        // Check for updates in background (silent)
-        updateChecker?.checkForUpdatesInBackground()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -61,11 +56,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPopover() {
         guard let button = statusItem?.button else { return }
 
-        // Only enable update checking if Sparkle is properly configured
-        let updateCheckClosure: (() -> Void)? = updateChecker?.isAvailable == true ? { [weak self] in
-            self?.checkForUpdates()
-        } : nil
-
         let contentView = MenuView(
             dataManager: dataManager!,
             officeDetectionService: officeDetectionService!,
@@ -74,8 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             },
             onOpenCalendar: { [weak self] in
                 self?.openCalendar()
-            },
-            onCheckForUpdates: updateCheckClosure
+            }
         )
 
         let hostingController = NSHostingController(rootView: contentView)
@@ -224,18 +213,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
-    @MainActor
-    func checkForUpdates() {
-        print("AppDelegate.checkForUpdates() called")
-
-        // Close the menu panel first
-        closePopover()
-
-        // Activate app to bring update dialog to front
-        NSApp.activate(ignoringOtherApps: true)
-
-        updateChecker?.checkForUpdates()
-    }
 }
 
 extension AppDelegate: NSWindowDelegate {
