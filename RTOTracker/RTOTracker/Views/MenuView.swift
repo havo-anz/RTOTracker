@@ -5,7 +5,7 @@ struct MenuView: View {
     @ObservedObject var officeDetectionService: OfficeDetectionService
     var onOpenSettings: () -> Void
     var onOpenCalendar: () -> Void
-    var onCheckForUpdates: () -> Void
+    var onCheckForUpdates: (() -> Void)?
 
     @State private var showingDetailView = false
     @State private var showingSettings = false
@@ -27,6 +27,10 @@ struct MenuView: View {
         }
         .padding()
         .frame(width: 320)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(NSColor.windowBackgroundColor))
+        )
     }
 
     private var headerView: some View {
@@ -64,7 +68,7 @@ struct MenuView: View {
     private var progressView: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Quarter progress
-            var progress = dataManager.getCurrentQuarterProgress()
+            let progress = dataManager.getCurrentQuarterProgress()
 
             HStack {
                 Text("This Quarter")
@@ -109,27 +113,82 @@ struct MenuView: View {
 
     private var actionsView: some View {
         VStack(spacing: 8) {
-            Button("View Calendar") {
-                openCalendarWindow()
+            // Primary actions
+            Button(action: openCalendarWindow) {
+                HStack {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 13))
+                    Text("View Calendar")
+                        .font(.system(size: 13))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.accentColor.opacity(0.1))
+                .cornerRadius(6)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
 
-            Button("Settings") {
-                openSettingsWindow()
+            Button(action: openSettingsWindow) {
+                HStack {
+                    Image(systemName: "gear")
+                        .font(.system(size: 13))
+                    Text("Settings")
+                        .font(.system(size: 13))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.accentColor.opacity(0.1))
+                .cornerRadius(6)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
 
-            Button("Check for Updates...") {
-                onCheckForUpdates()
+            if let checkForUpdates = onCheckForUpdates {
+                Button(action: checkForUpdates) {
+                    HStack {
+                        Image(systemName: "arrow.down.circle")
+                            .font(.system(size: 13))
+                        Text("Check for Updates...")
+                            .font(.system(size: 13))
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.bordered)
 
             Divider()
+                .padding(.vertical, 4)
 
-            Button("Quit RTO Tracker") {
-                NSApplication.shared.terminate(nil)
+            // Quit action
+            Button(action: { NSApplication.shared.terminate(nil) }) {
+                HStack {
+                    Image(systemName: "power")
+                        .font(.system(size: 13))
+                        .foregroundColor(.red)
+                    Text("Quit RTO Tracker")
+                        .font(.system(size: 13))
+                        .foregroundColor(.red)
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
         }
     }
 

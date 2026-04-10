@@ -3,13 +3,15 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
-    var popover: NSPopover?
+    var menuWindow: NSPanel?
     var officeDetectionService: OfficeDetectionService?
     var dataManager: DataManager?
     var settingsWindow: NSWindow?
     var calendarWindow: NSWindow?
     var updateChecker: UpdateChecker?
+    var eventMonitor: Any?
 
+    @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide dock icon for menu bar only app
         NSApp.setActivationPolicy(.accessory)
@@ -33,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         officeDetectionService?.stopDetection()
     }
 
+    @MainActor
     private func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
@@ -47,7 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     @objc private func togglePopover() {
-        if let popover = popover, popover.isShown {
+        if let window = menuWindow, window.isVisible {
             closePopover()
         } else {
             showPopover()
@@ -58,34 +61,78 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPopover() {
         guard let button = statusItem?.button else { return }
 
-        let popover = NSPopover()
-        popover.contentSize = NSSize(width: 320, height: 400)
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(
-            rootView: MenuView(
-                dataManager: dataManager!,
-                officeDetectionService: officeDetectionService!,
-                onOpenSettings: { [weak self] in
-                    self?.openSettings()
-                },
-                onOpenCalendar: { [weak self] in
-                    self?.openCalendar()
-                },
-                onCheckForUpdates: { [weak self] in
-                    self?.checkForUpdates()
-                }
-            )
+        // Only enable update checking if Sparkle is properly configured
+        let updateCheckClosure: (() -> Void)? = updateChecker?.isAvailable == true ? { [weak self] in
+            self?.checkForUpdates()
+        } : nil
+
+        let contentView = MenuView(
+            dataManager: dataManager!,
+            officeDetectionService: officeDetectionService!,
+            onOpenSettings: { [weak self] in
+                self?.openSettings()
+            },
+            onOpenCalendar: { [weak self] in
+                self?.openCalendar()
+            },
+            onCheckForUpdates: updateCheckClosure
         )
 
-        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-        self.popover = popover
+        let hostingController = NSHostingController(rootView: contentView)
+        hostingController.view.frame.size = NSSize(width: 320, height: 400)
+
+        // Create borderless panel
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 320, height: 400),
+            styleMask: [.nonactivatingPanel, .borderless],
+            backing: .buffered,
+            defer: false
+        )
+        panel.contentViewController = hostingController
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = true
+        panel.level = .popUpMenu
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+
+        // Apply corner radius to panel itself
+        panel.contentView?.wantsLayer = true
+        panel.contentView?.layer?.cornerRadius = 10
+
+        // Position below menu bar icon
+        let buttonWindow = button.window!
+        let buttonFrame = button.convert(button.bounds, to: nil)
+        let screenFrame = buttonWindow.convertToScreen(buttonFrame)
+
+        let panelX = screenFrame.origin.x - (panel.frame.width / 2) + (screenFrame.width / 2)
+        let panelY = screenFrame.origin.y - panel.frame.height - 8
+
+        panel.setFrameOrigin(NSPoint(x: panelX, y: panelY))
+        panel.makeKeyAndOrderFront(nil)
+
+        self.menuWindow = panel
+
+        // Add event monitor to detect clicks outside the window
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            if let window = self?.menuWindow, window.isVisible {
+                self?.closePopover()
+            }
+        }
     }
 
+    @MainActor
     private func closePopover() {
-        popover?.close()
-        popover = nil
+        menuWindow?.close()
+        menuWindow = nil
+
+        // Remove event monitor
+        if let eventMonitor = eventMonitor {
+            NSEvent.removeMonitor(eventMonitor)
+            self.eventMonitor = nil
+        }
     }
 
+    @MainActor
     func updateMenuBarIcon() {
         guard let button = statusItem?.button,
               let todayRecord = dataManager?.getTodayRecord() else { return }
@@ -103,11 +150,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func openSettings() {
         print("AppDelegate.openSettings() called")
 
+        // Activate app first (important for accessory apps)
+        NSApp.activate(ignoringOtherApps: true)
+
+        // Close the menu panel
+        closePopover()
+
         // If settings window already exists, bring it to front
         if let window = settingsWindow, window.isVisible {
             print("Settings window already exists, bringing to front")
             window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
             return
         }
 
@@ -133,18 +185,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         print("Showing settings window")
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     @MainActor
     func openCalendar() {
         print("AppDelegate.openCalendar() called")
 
+        // Activate app first (important for accessory apps)
+        NSApp.activate(ignoringOtherApps: true)
+
+        // Close the menu panel
+        closePopover()
+
         // If calendar window already exists, bring it to front
         if let window = calendarWindow, window.isVisible {
             print("Calendar window already exists, bringing to front")
             window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
             return
         }
 
@@ -166,12 +222,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         print("Showing calendar window")
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     @MainActor
     func checkForUpdates() {
         print("AppDelegate.checkForUpdates() called")
+
+        // Close the menu panel first
+        closePopover()
+
+        // Activate app to bring update dialog to front
+        NSApp.activate(ignoringOtherApps: true)
+
         updateChecker?.checkForUpdates()
     }
 }

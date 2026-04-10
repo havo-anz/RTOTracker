@@ -123,7 +123,7 @@ final class DataManager: ObservableObject {
         let status: TrackingStatus
         if actualDays >= expectedDays + 2 {
             status = .ahead
-        } else if actualDays >= expectedDays - 1 {
+        } else if actualDays >= expectedDays {
             status = .onTrack
         } else {
             status = .behind
@@ -181,19 +181,19 @@ final class DataManager: ObservableObject {
             quarterStartMonth = 10
         }
 
-        // Calculate start and end dates
+        // Calculate start date
         var startComponents = DateComponents()
         startComponents.year = year
         startComponents.month = quarterStartMonth
         startComponents.day = 1
 
-        var endComponents = DateComponents()
-        endComponents.year = year
-        endComponents.month = quarterStartMonth + 2
-        endComponents.day = 31
+        guard let startDate = calendar.date(from: startComponents) else { return (date, date) }
 
-        let startDate = calendar.date(from: startComponents) ?? date
-        let endDate = calendar.date(from: endComponents) ?? date
+        // Calculate end date by adding 3 months to start, then subtracting 1 day
+        guard let nextQuarterStart = calendar.date(byAdding: .month, value: 3, to: startDate),
+              let endDate = calendar.date(byAdding: .day, value: -1, to: nextQuarterStart) else {
+            return (startDate, startDate)
+        }
 
         return (calendar.startOfDay(for: startDate), calendar.startOfDay(for: endDate))
     }
@@ -241,13 +241,18 @@ final class DataManager: ObservableObject {
     func toggleDayConfirmation(for date: Date) {
         let targetDate = Calendar.current.startOfDay(for: date)
         if let index = dayRecords.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: targetDate) }) {
-            dayRecords[index].isConfirmed.toggle()
-            dayRecords[index].isManualOverride = true
+            var record = dayRecords[index]
+            record.isConfirmed.toggle()
+            record.isManualOverride = true
+            dayRecords[index] = record
         } else {
             var newRecord = DayRecord(date: targetDate)
             newRecord.isConfirmed = true
             newRecord.isManualOverride = true
             dayRecords.append(newRecord)
         }
+
+        // Explicitly notify observers of the change
+        objectWillChange.send()
     }
 }

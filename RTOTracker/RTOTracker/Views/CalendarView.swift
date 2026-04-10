@@ -163,7 +163,7 @@ struct CalendarView: View {
 
             // Calendar days
             LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(getDaysInMonth(), id: \.self) { date in
+                ForEach(Array(getDaysInMonth().enumerated()), id: \.offset) { index, date in
                     if let date = date {
                         dayCell(for: date)
                     } else {
@@ -203,6 +203,7 @@ struct CalendarView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 60)
+            .contentShape(Rectangle())
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(isToday ? Color.accentColor.opacity(0.15) : Color.clear)

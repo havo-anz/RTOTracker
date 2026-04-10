@@ -74,3 +74,4 @@ DMG_Temp/
 
 # Release builds (optional - comment out if you want to commit releases)
 # releases/
+.sparkle-private-key
