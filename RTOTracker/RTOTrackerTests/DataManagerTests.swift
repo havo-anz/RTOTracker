@@ -484,6 +484,42 @@ final class DataManagerTests {
         #expect(tracking.expectedDays == 36)
     }
 
+    @Test("Goal met: confirmed >= target shows completion")
+    func goalMetExactlyAtTarget() {
+        // Create exactly 36 confirmed days
+        sut.dayRecords = createConfirmedRecordsInQ2(count: 36)
+
+        let progress = sut.getCurrentQuarterProgress()
+
+        #expect(progress.confirmed >= progress.target)
+        #expect(progress.confirmed == 36)
+        #expect(progress.target == 36)
+    }
+
+    @Test("Goal met: confirmed > target shows completion")
+    func goalMetOverTarget() {
+        // Create 40 confirmed days (exceeded target)
+        sut.dayRecords = createConfirmedRecordsInQ2(count: 40)
+
+        let progress = sut.getCurrentQuarterProgress()
+
+        #expect(progress.confirmed >= progress.target)
+        #expect(progress.confirmed == 40)
+        #expect(progress.target == 36)
+    }
+
+    @Test("Goal not met: confirmed < target")
+    func goalNotMet() {
+        // Create only 20 confirmed days
+        sut.dayRecords = createConfirmedRecordsInQ2(count: 20)
+
+        let progress = sut.getCurrentQuarterProgress()
+
+        #expect(progress.confirmed < progress.target)
+        #expect(progress.confirmed == 20)
+        #expect(progress.target == 36)
+    }
+
     // MARK: - Workday Counting Accuracy
 
     @Test("Total workdays in Q2 2026 is 65")

@@ -94,18 +94,31 @@ struct MenuView: View {
             }
             .frame(height: 8)
 
+            // Congratulations banner if goal is met
+            if progress.confirmed >= progress.target {
+                congratulationsBanner
+            }
+
             // Tracking Status
             trackingStatusView
 
             // Stats
-            VStack(alignment: .leading, spacing: 4) {
-                Text(daysRemainingText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            if progress.confirmed < progress.target {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(daysRemainingText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
-                Text(requiredPaceText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    Text(requiredPaceText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Goal complete! Relax and enjoy your WFH days")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
@@ -184,6 +197,41 @@ struct MenuView: View {
     }
 
     // MARK: - Views
+
+    private var congratulationsBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "trophy.fill")
+                .foregroundColor(.yellow)
+                .font(.system(size: 16))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Congratulations!")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+
+                Text("You've met your RTO requirement for this quarter")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.green.opacity(0.15), Color.green.opacity(0.05)]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.green.opacity(0.3), lineWidth: 1)
+        )
+        .cornerRadius(8)
+    }
 
     private var trackingStatusView: some View {
         let tracking = dataManager.getTrackingStatus()
