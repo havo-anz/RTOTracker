@@ -1,12 +1,14 @@
 import Foundation
 import Combine
 
+@MainActor
 final class DataManager: ObservableObject {
     @Published var dayRecords: [DayRecord] = []
     @Published var settings: AppSettings
 
     private var userDefaults: UserDefaults
     private var cancellables = Set<AnyCancellable>()
+    weak var achievementManager: AchievementManager?
 
     private var recordsKey: String { "dayRecords" }
     private var settingsKey: String { "appSettings" }
@@ -62,6 +64,7 @@ final class DataManager: ObservableObject {
 
     func confirmTodayAsOfficeDay(at time: Date = Date()) {
         var record = getTodayRecord()
+        let wasConfirmed = record.isConfirmed
 
         if record.firstCheckinTime == nil {
             record.firstCheckinTime = time
@@ -70,6 +73,11 @@ final class DataManager: ObservableObject {
         record.isConfirmed = true
 
         updateTodayRecord(record)
+
+        // Only check achievements if status changed from unconfirmed to confirmed
+        if wasConfirmed == false {
+            achievementManager?.checkAchievements(dataManager: self)
+        }
     }
 
     func getRecordsForQuarter(_ date: Date = Date()) -> [DayRecord] {
@@ -218,15 +226,38 @@ final class DataManager: ObservableObject {
     // MARK: - Persistence
 
     private func loadRecords() {
-        if let data = userDefaults.data(forKey: recordsKey),
-           let decoded = try? JSONDecoder().decode([DayRecord].self, from: data) {
-            dayRecords = decoded
+        if let data = userDefaults.data(forKey: recordsKey) {
+            print("📦 Loading records from UserDefaults (\(data.count) bytes)")
+            do {
+                let decoded = try JSONDecoder().decode([DayRecord].self, from: data)
+                dayRecords = decoded
+                print("✅ Loaded \(decoded.count) day records")
+
+                // Log first few records for debugging
+                for (index, record) in decoded.prefix(3).enumerated() {
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .short
+                    print("  Record \(index + 1): \(formatter.string(from: record.date)) - Confirmed: \(record.isConfirmed)")
+                }
+            } catch {
+                print("❌ Error decoding day records: \(error)")
+                print("   Data: \(String(data: data, encoding: .utf8) ?? "Unable to decode")")
+                // Keep empty array on error
+                dayRecords = []
+            }
+        } else {
+            print("ℹ️ No existing day records found in UserDefaults")
+            dayRecords = []
         }
     }
 
     private func saveRecords() {
-        if let encoded = try? JSONEncoder().encode(dayRecords) {
+        do {
+            let encoded = try JSONEncoder().encode(dayRecords)
             userDefaults.set(encoded, forKey: recordsKey)
+            print("💾 Saved \(dayRecords.count) day records (\(encoded.count) bytes)")
+        } catch {
+            print("❌ Error encoding day records: \(error)")
         }
     }
 
@@ -234,6 +265,153 @@ final class DataManager: ObservableObject {
         if let encoded = try? JSONEncoder().encode(settings) {
             userDefaults.set(encoded, forKey: settingsKey)
         }
+    }
+
+    // MARK: - Data Export/Import
+
+    func exportData() -> Data? {
+        let exportData = ExportData(
+            dayRecords: dayRecords,
+            settings: settings,
+            exportDate: Date(),
+            appVersion: "1.3"
+        )
+
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(exportData)
+            print("📤 Exported \(dayRecords.count) records")
+            return data
+        } catch {
+            print("❌ Export error: \(error)")
+            return nil
+        }
+    }
+
+    func importData(from data: Data) throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let importedData = try decoder.decode(ExportData.self, from: data)
+
+        // Merge records (keep existing if dates conflict)
+        var recordMap: [Date: DayRecord] = [:]
+
+        // Add existing records
+        for record in dayRecords {
+            let key = Calendar.current.startOfDay(for: record.date)
+            recordMap[key] = record
+        }
+
+        // Add imported records (don't overwrite existing)
+        var newCount = 0
+        for record in importedData.dayRecords {
+            let key = Calendar.current.startOfDay(for: record.date)
+            if recordMap[key] == nil {
+                recordMap[key] = record
+                newCount += 1
+            }
+        }
+
+        dayRecords = Array(recordMap.values).sorted { $0.date < $1.date }
+        print("📥 Imported \(newCount) new records, total: \(dayRecords.count)")
+
+        // Optionally import settings
+        // settings = importedData.settings
+    }
+
+    // MARK: - Complete Data Export/Import (v2.0)
+
+    func exportCompleteData(achievementManager: AchievementManager) throws -> Data {
+        let backupManager = BackupManager()
+        let metadata = achievementManager.exportMetadata()
+        let backup = try backupManager.createBackup(
+            dayRecords: dayRecords,
+            settings: settings,
+            achievements: achievementManager.achievements,
+            achievementMetadata: metadata
+        )
+        return try backupManager.saveToData(backup)
+    }
+
+    func importCompleteData(
+        from data: Data,
+        mode: ImportMode,
+        achievementManager: AchievementManager,
+        importSettings: Bool = false
+    ) throws {
+        let backupManager = BackupManager()
+
+        // Create safety backup before import
+        let safetyURL = try backupManager.createSafetyBackup(
+            dataManager: self,
+            achievementManager: achievementManager
+        )
+
+        do {
+            // Load and validate
+            let backup = try backupManager.loadBackup(from: data)
+
+            // For merge mode, respect importSettings flag
+            var actualMode = mode
+            if mode == .merge && !importSettings {
+                // Custom merge without settings
+                try customMergeWithoutSettings(backup, backupManager: backupManager, achievementManager: achievementManager)
+                return
+            }
+
+            // Restore based on mode
+            try backupManager.restoreBackup(
+                backup,
+                mode: actualMode,
+                dataManager: self,
+                achievementManager: achievementManager
+            )
+
+            print("✅ Import successful, safety backup at: \(safetyURL.path)")
+        } catch {
+            print("❌ Import failed: \(error.localizedDescription)")
+            print("   Safety backup available at: \(safetyURL.path)")
+            throw error
+        }
+    }
+
+    private func customMergeWithoutSettings(
+        _ backup: BackupData,
+        backupManager: BackupManager,
+        achievementManager: AchievementManager
+    ) throws {
+        // Merge records only, don't touch settings
+        var recordMap: [Date: DayRecord] = [:]
+        for record in dayRecords {
+            let key = Calendar.current.startOfDay(for: record.date)
+            recordMap[key] = record
+        }
+
+        var addedCount = 0
+        for record in backup.dayRecords {
+            let key = Calendar.current.startOfDay(for: record.date)
+            if recordMap[key] == nil {
+                recordMap[key] = record
+                addedCount += 1
+            }
+        }
+
+        dayRecords = Array(recordMap.values).sorted { $0.date < $1.date }
+
+        // Merge achievements
+        for backupAchievement in backup.achievements where backupAchievement.isUnlocked {
+            if let index = achievementManager.achievements.firstIndex(where: { $0.id == backupAchievement.id }) {
+                if !achievementManager.achievements[index].isUnlocked {
+                    achievementManager.achievements[index].isUnlocked = true
+                    achievementManager.achievements[index].unlockedDate = backupAchievement.unlockedDate
+                }
+            }
+        }
+
+        print("✅ Merge complete (settings preserved): Added \(addedCount) new records")
     }
 
     // MARK: - Manual Override
@@ -254,5 +432,47 @@ final class DataManager: ObservableObject {
 
         // Explicitly notify observers of the change
         objectWillChange.send()
+
+        // Check achievements after manual toggle
+        achievementManager?.checkAchievements(dataManager: self)
     }
+
+    // MARK: - Bulk Add Days
+
+    func addMultipleDays(_ dates: [Date]) {
+        var addedCount = 0
+
+        for date in dates {
+            let targetDate = Calendar.current.startOfDay(for: date)
+
+            // Skip if record already exists
+            if dayRecords.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: targetDate) }) {
+                continue
+            }
+
+            var newRecord = DayRecord(date: targetDate)
+            newRecord.isConfirmed = true
+            newRecord.isManualOverride = true
+            dayRecords.append(newRecord)
+            addedCount += 1
+        }
+
+        // Sort by date
+        dayRecords.sort { $0.date < $1.date }
+
+        print("✅ Added \(addedCount) historical office days")
+
+        // Notify and check achievements
+        objectWillChange.send()
+        achievementManager?.checkAchievements(dataManager: self)
+    }
+}
+
+// MARK: - Export Data Model
+
+struct ExportData: Codable {
+    let dayRecords: [DayRecord]
+    let settings: AppSettings
+    let exportDate: Date
+    let appVersion: String
 }

@@ -3,8 +3,10 @@ import SwiftUI
 struct MenuView: View {
     @ObservedObject var dataManager: DataManager
     @ObservedObject var officeDetectionService: OfficeDetectionService
+    @ObservedObject var achievementManager: AchievementManager
     var onOpenSettings: () -> Void
     var onOpenCalendar: () -> Void
+    var onOpenAchievements: () -> Void
 
     @State private var showingDetailView = false
     @State private var showingSettings = false
@@ -36,6 +38,23 @@ struct MenuView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("RTO Tracker")
                 .font(.headline)
+
+            // Streak indicator
+            if currentStreak >= 3 {
+                HStack(spacing: 6) {
+                    Image(systemName: "flame.fill")
+                        .foregroundColor(streakColorForUI(currentStreak))
+                        .font(.system(size: 16))
+                    Text("\(currentStreak)-day streak!")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(streakColorForUI(currentStreak))
+                }
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(streakColorForUI(currentStreak).opacity(0.15))
+                .cornerRadius(6)
+            }
 
             if officeDetectionService.isAtOffice {
                 HStack {
@@ -145,6 +164,35 @@ struct MenuView: View {
             }
             .buttonStyle(.plain)
 
+            Button(action: openAchievementsWindow) {
+                HStack {
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 13))
+                        .foregroundColor(.yellow)
+                    Text("Achievements")
+                        .font(.system(size: 13))
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Text("\(achievementManager.unlockedCount)")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.accentColor)
+                        Text("/ \(achievementManager.totalCount)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.accentColor.opacity(0.1))
+                .cornerRadius(6)
+            }
+            .buttonStyle(.plain)
+
             Button(action: openSettingsWindow) {
                 HStack {
                     Image(systemName: "gear")
@@ -194,6 +242,11 @@ struct MenuView: View {
     private func openCalendarWindow() {
         print("Opening calendar")
         onOpenCalendar()
+    }
+
+    private func openAchievementsWindow() {
+        print("Opening achievements")
+        onOpenAchievements()
     }
 
     // MARK: - Views
@@ -317,5 +370,69 @@ struct MenuView: View {
         let daysPerWeek = weeksLeft > 0 ? Double(daysNeeded) / weeksLeft : 0
 
         return String(format: "Required pace: %.1f days/week", daysPerWeek)
+    }
+
+    // MARK: - Streak Calculation
+
+    private var currentStreak: Int {
+        let records = dataManager.dayRecords.sorted { $0.date > $1.date }
+
+        var streak = 0
+        var expectedDate = Calendar.current.startOfDay(for: Date())
+
+        var recordMap: [Date: DayRecord] = [:]
+        for record in records {
+            recordMap[Calendar.current.startOfDay(for: record.date)] = record
+        }
+
+        while true {
+            let weekday = Calendar.current.component(.weekday, from: expectedDate)
+
+            // Skip weekends
+            if weekday == 1 || weekday == 7 {
+                expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
+                continue
+            }
+
+            if let record = recordMap[expectedDate] {
+                // Check day type
+                if record.dayType == .publicHoliday || record.dayType == .annualLeave {
+                    expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
+                    continue
+                }
+
+                // Must be a workday - check if confirmed
+                if record.isConfirmed {
+                    streak += 1
+                    expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
+                } else {
+                    break
+                }
+            } else {
+                // No record for today - don't break streak if it's today
+                let today = Calendar.current.startOfDay(for: Date())
+                if Calendar.current.isDate(expectedDate, inSameDayAs: today) {
+                    expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
+                    continue
+                } else {
+                    break
+                }
+            }
+        }
+
+        return streak
+    }
+
+    private func streakColorForUI(_ streak: Int) -> Color {
+        switch streak {
+        case 3...4:
+            return Color(red: 1.0, green: 0.65, blue: 0.0) // Yellow-Orange
+        case 5...9:
+            return Color(red: 1.0, green: 0.42, blue: 0.21) // Orange
+        case 10...:
+            return Color(red: 1.0, green: 0.23, blue: 0.19) // Red
+        default:
+            return .primary
+        }
     }
 }

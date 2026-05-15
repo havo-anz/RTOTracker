@@ -3,6 +3,7 @@ import Network
 import Combine
 import AppKit
 
+@MainActor
 final class OfficeDetectionService: ObservableObject {
     @Published var isAtOffice: Bool = false
     @Published var currentIP: String = ""

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2635 /* BackupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2631 /* BackupData.swift */; };
+		2636 /* BackupValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2632 /* BackupValidator.swift */; };
+		2637 /* BackupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633 /* BackupManager.swift */; };
+		2638 /* RestoreDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2634 /* RestoreDialogView.swift */; };
 		0001 /* RTOTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0010 /* RTOTrackerApp.swift */; };
 		0002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0011 /* AppDelegate.swift */; };
 		0003 /* DayRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0012 /* DayRecord.swift */; };
@@ -16,6 +20,9 @@
 		0007 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016 /* MenuView.swift */; };
 		0008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0017 /* SettingsView.swift */; };
 		0009 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0019 /* CalendarView.swift */; };
+		000A /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001A /* Achievement.swift */; };
+		000B /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001B /* AchievementManager.swift */; };
+		000C /* AchievementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001C /* AchievementsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +36,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2631 /* BackupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupData.swift; sourceTree = "<group>"; };
+		2632 /* BackupValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupValidator.swift; sourceTree = "<group>"; };
+		2633 /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
+		2634 /* RestoreDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreDialogView.swift; sourceTree = "<group>"; };
 		0010 /* RTOTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTOTrackerApp.swift; sourceTree = "<group>"; };
 		0011 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0012 /* DayRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRecord.swift; sourceTree = "<group>"; };
@@ -39,6 +50,9 @@
 		0017 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0019 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		001A /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
+		001B /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
+		001C /* AchievementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsView.swift; sourceTree = "<group>"; };
 		0100 /* RTOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C85D479E2F86055500E81F9A /* RTOTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTOTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -99,8 +113,10 @@
 		0310 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				2631 /* BackupData.swift */,
 				0012 /* DayRecord.swift */,
 				0013 /* Settings.swift */,
+				001A /* Achievement.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -108,8 +124,11 @@
 		0311 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2632 /* BackupValidator.swift */,
+				2633 /* BackupManager.swift */,
 				0014 /* DataManager.swift */,
 				0015 /* OfficeDetectionService.swift */,
+				001B /* AchievementManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -117,9 +136,11 @@
 		0312 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2634 /* RestoreDialogView.swift */,
 				0016 /* MenuView.swift */,
 				0017 /* SettingsView.swift */,
 				0019 /* CalendarView.swift */,
+				001C /* AchievementsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -238,6 +259,13 @@
 				0007 /* MenuView.swift in Sources */,
 				0008 /* SettingsView.swift in Sources */,
 				0009 /* CalendarView.swift in Sources */,
+				000A /* Achievement.swift in Sources */,
+				000B /* AchievementManager.swift in Sources */,
+				000C /* AchievementsView.swift in Sources */,
+				2635 /* BackupData.swift in Sources */,
+				2636 /* BackupValidator.swift in Sources */,
+				2637 /* BackupManager.swift in Sources */,
+				2638 /* RestoreDialogView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,7 +412,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -411,7 +439,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -436,7 +464,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 4S3335WCU7;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
@@ -457,7 +485,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 4S3335WCU7;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;

@@ -7,6 +7,8 @@ struct AppSettings: Codable {
     var reminderEnabled: Bool
     var reminderTime: Date
     var launchAtLogin: Bool
+    var showInDock: Bool
+    var autoBackupEnabled: Bool
 
     static var `default`: AppSettings {
         AppSettings(
@@ -15,7 +17,9 @@ struct AppSettings: Codable {
             quarterStartMonths: [1, 4, 7, 10], // Calendar quarters
             reminderEnabled: true,
             reminderTime: createTime(hour: 9, minute: 15),
-            launchAtLogin: false
+            launchAtLogin: false,
+            showInDock: false,
+            autoBackupEnabled: true  // Enable by default to protect users
         )
     }
 

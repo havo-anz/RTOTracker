@@ -191,9 +191,9 @@ struct CalendarView: View {
                     .foregroundColor(isCurrentMonth ? .primary : .secondary.opacity(0.5))
 
                 // Indicator dot
-                if let record = record, record.isConfirmed {
+                if let record = record {
                     Circle()
-                        .fill(record.isManualOverride ? Color.orange : Color.green)
+                        .fill(dayColor(for: record))
                         .frame(width: 8, height: 8)
                 } else {
                     Circle()
@@ -206,7 +206,7 @@ struct CalendarView: View {
             .contentShape(Rectangle())
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isToday ? Color.accentColor.opacity(0.15) : Color.clear)
+                    .fill(backgroundColorForDay(record: record, isToday: isToday))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
@@ -214,31 +214,66 @@ struct CalendarView: View {
             )
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Button("Mark as Office Day") {
+                setDayType(for: date, type: .workday, confirmed: true)
+            }
+            Button("Mark as Public Holiday") {
+                setDayType(for: date, type: .publicHoliday, confirmed: false)
+            }
+            Button("Mark as Annual Leave") {
+                setDayType(for: date, type: .annualLeave, confirmed: false)
+            }
+            Divider()
+            Button("Reset to Workday") {
+                setDayType(for: date, type: .workday, confirmed: false)
+            }
+        }
     }
 
     private var legendView: some View {
-        HStack(spacing: 32) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 12, height: 12)
-                Text("Office Day (Auto)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+        VStack(spacing: 12) {
+            HStack(spacing: 24) {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 12, height: 12)
+                    Text("Office Day (Auto)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 12, height: 12)
+                    Text("Office Day (Manual)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 12, height: 12)
+                    Text("Public Holiday")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.purple)
+                        .frame(width: 12, height: 12)
+                    Text("Annual Leave")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
             }
 
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(Color.orange)
-                    .frame(width: 12, height: 12)
-                Text("Office Day (Manual)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Text("💡 Click a day to toggle manually")
+            Text("💡 Click a day to toggle • Right-click for more options")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .italic()
@@ -287,6 +322,55 @@ struct CalendarView: View {
 
     private func toggleDayConfirmation(for date: Date) {
         dataManager.toggleDayConfirmation(for: date)
+    }
+
+    private func setDayType(for date: Date, type: DayRecord.DayType, confirmed: Bool) {
+        let targetDate = Calendar.current.startOfDay(for: date)
+        if let index = dataManager.dayRecords.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: targetDate) }) {
+            var record = dataManager.dayRecords[index]
+            record.dayType = type
+            record.isConfirmed = confirmed
+            record.isManualOverride = true
+            dataManager.dayRecords[index] = record
+        } else {
+            var newRecord = DayRecord(date: targetDate, dayType: type)
+            newRecord.isConfirmed = confirmed
+            newRecord.isManualOverride = true
+            dataManager.dayRecords.append(newRecord)
+        }
+    }
+
+    private func dayColor(for record: DayRecord) -> Color {
+        switch record.dayType {
+        case .publicHoliday:
+            return .red
+        case .annualLeave:
+            return .purple
+        case .weekend:
+            return .gray
+        case .workday:
+            if record.isConfirmed {
+                return record.isManualOverride ? .orange : .green
+            } else {
+                return .clear
+            }
+        }
+    }
+
+    private func backgroundColorForDay(record: DayRecord?, isToday: Bool) -> Color {
+        if let record = record {
+            switch record.dayType {
+            case .publicHoliday:
+                return Color.red.opacity(0.1)
+            case .annualLeave:
+                return Color.purple.opacity(0.1)
+            case .weekend:
+                return Color.gray.opacity(0.05)
+            case .workday:
+                return isToday ? Color.accentColor.opacity(0.15) : Color.clear
+            }
+        }
+        return isToday ? Color.accentColor.opacity(0.15) : Color.clear
     }
 
     private func previousMonth() {
